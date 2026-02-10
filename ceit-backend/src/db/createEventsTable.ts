@@ -1,0 +1,72 @@
+import { db } from './index';
+import pg from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+async function createEventsTable() {
+  console.log('Creating events table...');
+  
+  const { Pool } = pg;
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
+
+  try {
+    // Create events table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS events (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+        department_id uuid NOT NULL,
+        admin_id uuid NOT NULL,
+        title varchar(255) NOT NULL,
+        description text,
+        event_date timestamp NOT NULL,
+        end_date timestamp,
+        location varchar(255),
+        created_at timestamp DEFAULT now() NOT NULL
+      );
+    `);
+
+    console.log('Events table created');
+
+    // Add foreign key constraints - check first if they exist
+    try {
+      await pool.query(`
+        ALTER TABLE events ADD CONSTRAINT events_department_id_departments_id_fk 
+        FOREIGN KEY (department_id) REFERENCES departments(id);
+      `);
+      console.log('Department FK constraint added');
+    } catch (err: any) {
+      if (err.code === '42710') {
+        console.log('Department FK constraint already exists');
+      } else {
+        throw err;
+      }
+    }
+
+    try {
+      await pool.query(`
+        ALTER TABLE events ADD CONSTRAINT events_admin_id_users_id_fk 
+        FOREIGN KEY (admin_id) REFERENCES users(id);
+      `);
+      console.log('Admin FK constraint added');
+    } catch (err: any) {
+      if (err.code === '42710') {
+        console.log('Admin FK constraint already exists');
+      } else {
+        throw err;
+      }
+    }
+
+    console.log('Events table setup completed successfully!');
+    
+  } catch (error) {
+    console.error('Error creating events table:', error);
+  } finally {
+    await pool.end();
+    process.exit(0);
+  }
+}
+
+createEventsTable();

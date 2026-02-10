@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEIT Posts Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .filter-section label {
+            font-weight: 600;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        .filter-section select, .filter-section button {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section select {
+            margin-right: 10px;
+            background: white;
+        }
+
+        .filter-section button {
+            background: #667eea;
+            color: white;
+            border: none;
+        }
+
+        .filter-section button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .post-content {
+            padding: 20px;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .post-meta {
+            flex: 1;
+        }
+
+        .post-admin {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .post-department {
+            font-size: 0.85rem;
+            color: #666;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .post-date {
+            font-size: 0.85rem;
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .post-caption {
+            color: #333;
+            line-height: 1.6;
+            margin-top: 15px;
+            word-wrap: break-word;
+        }
+
+        .no-posts {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            color: #666;
+        }
+
+        .no-posts h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-section {
+                text-align: center;
+            }
+
+            .filter-section select, .filter-section button {
+                display: block;
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📢 CEIT Posts Viewer</h1>
+            <p>View all posts from administrators</p>
+        </header>
+
+        <div class="filter-section">
+            <label for="departmentFilter">Filter by Department:</label>
+            <select id="departmentFilter">
+                <option value="">All Departments</option>
+            </select>
+            <button onclick="loadPosts()">🔄 Refresh</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Loading posts...
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="postsContainer" class="posts-grid">
+            <!-- Posts will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/posts/public';
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) {
+                const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+                if (diffHours === 0) {
+                    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+                    return diffMinutes === 0 ? 'Just now' : `${diffMinutes}m ago`;
+                }
+                return `${diffHours}h ago`;
+            } else if (diffDays === 1) {
+                return 'Yesterday';
+            } else if (diffDays < 7) {
+                return `${diffDays} days ago`;
+            } else {
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+        }
+
+        function createPostCard(post) {
+            const card = document.createElement('div');
+            card.className = 'post-card';
+
+            const imageHtml = post.imageUrl 
+                ? `<img src="${post.imageUrl}" alt="Post image" class="post-image" onerror="this.style.display='none'">`
+                : '';
+
+            card.innerHTML = `
+                ${imageHtml}
+                <div class="post-content">
+                    <div class="post-header">
+                        <div class="post-meta">
+                            <div class="post-admin">👤 ${post.adminName || 'Unknown Admin'}</div>
+                            <span class="post-department">${post.departmentName || 'Unknown Department'}</span>
+                        </div>
+                        <div class="post-date">🕐 ${formatDate(post.createdAt)}</div>
+                    </div>
+                    <div class="post-caption">${post.caption}</div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = message ? 'block' : 'none';
+        }
+
+        async function loadDepartments() {
+            // In a real scenario, you might have a separate endpoint for departments
+            // For now, we'll populate this from the posts
+        }
+
+        async function loadPosts() {
+            const container = document.getElementById('postsContainer');
+            const departmentFilter = document.getElementById('departmentFilter').value;
+
+            showLoading(true);
+            showError('');
+            container.innerHTML = '';
+
+            try {
+                const url = departmentFilter 
+                    ? `${API_URL}?departmentId=${departmentFilter}`
+                    : API_URL;
+
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const posts = await response.json();
+
+                showLoading(false);
+
+                if (posts.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-posts">
+                            <h2>📭 No posts yet</h2>
+                            <p>Check back later for updates!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Extract unique departments for the filter
+                const departments = new Set();
+                posts.forEach(post => {
+                    if (post.departmentName) {
+                        departments.add(JSON.stringify({
+                            id: post.departmentId,
+                            name: post.departmentName
+                        }));
+                    }
+                });
+
+                // Update department filter if empty
+                const filterSelect = document.getElementById('departmentFilter');
+                if (filterSelect.options.length === 1) {
+                    departments.forEach(deptStr => {
+                        const dept = JSON.parse(deptStr);
+                        const option = document.createElement('option');
+                        option.value = dept.id;
+                        option.textContent = dept.name;
+                        filterSelect.appendChild(option);
+                    });
+                }
+
+                posts.forEach(post => {
+                    container.appendChild(createPostCard(post));
+                });
+
+            } catch (error) {
+                showLoading(false);
+                showError(`Failed to load posts: ${error.message}. Make sure the backend server is running on ${API_URL}`);
+                console.error('Error loading posts:', error);
+            }
+        }
+
+        // Load posts when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPosts();
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadPosts, 30000);
+    </script>
+</body>
+</html>
