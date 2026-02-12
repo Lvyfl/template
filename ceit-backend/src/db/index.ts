@@ -5,8 +5,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  connectionTimeoutMillis: 8000,
+  query_timeout: 120000,
+  idleTimeoutMillis: 30000,
+  max: 10,
   ssl: {
     rejectUnauthorized: false, // Required for many serverless Postgres providers like Nile
   },

@@ -99,6 +99,52 @@ export const getEvents = async (req: any, res: Response) => {
   }
 };
 
+// Public: Get events without authentication (for viewer.html)
+export const getPublicEvents = async (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate, departmentId } = req.query;
+
+    let query = db
+      .select({
+        id: events.id,
+        title: events.title,
+        description: events.description,
+        eventDate: events.eventDate,
+        endDate: events.endDate,
+        location: events.location,
+        createdAt: events.createdAt,
+        adminName: users.name,
+        departmentName: departments.name,
+        departmentId: events.departmentId,
+      })
+      .from(events)
+      .leftJoin(users, eq(events.adminId, users.id))
+      .leftJoin(departments, eq(events.departmentId, departments.id))
+      .orderBy(events.eventDate);
+
+    const conditions = [];
+    if (departmentId && typeof departmentId === 'string') {
+      conditions.push(eq(events.departmentId, departmentId));
+    }
+    if (startDate) {
+      conditions.push(gte(events.eventDate, new Date(startDate as string)));
+    }
+    if (endDate) {
+      conditions.push(lte(events.eventDate, new Date(endDate as string)));
+    }
+
+    if (conditions.length > 0) {
+      const publicEvents = await query.where(and(...conditions));
+      return res.json(publicEvents);
+    }
+
+    const publicEvents = await query;
+    res.json(publicEvents);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Get a single event by ID
 export const getEventById = async (req: any, res: Response) => {
   try {

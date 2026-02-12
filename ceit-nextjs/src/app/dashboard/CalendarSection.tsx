@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { eventsAPI } from '@/lib/api';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CalendarEvent {
   id: string;
@@ -13,11 +14,13 @@ interface CalendarEvent {
   location?: string;
   adminName?: string;
   departmentName?: string;
+  departmentId?: string;
 }
 
 export default function CalendarSection() {
   const { theme } = useTheme();
   const d = theme === 'dark';
+  const { user } = useAuth();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -25,12 +28,34 @@ export default function CalendarSection() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newEvent, setNewEvent] = useState({ title: '', description: '', eventDate: '', endDate: '', location: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [openMenuEventId, setOpenMenuEventId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editEventId, setEditEventId] = useState<string | null>(null);
+  const [editEvent, setEditEvent] = useState({ title: '', description: '', eventDate: '', endDate: '', location: '' });
+
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [detailsEvent, setDetailsEvent] = useState<CalendarEvent | null>(null);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
+  const [deleteTarget, setDeleteTarget] = useState<CalendarEvent | null>(null);
+  const [deleteTyped, setDeleteTyped] = useState('');
 
   const today = useMemo(() => {
     const t = new Date();
     t.setHours(0, 0, 0, 0);
     return t;
   }, []);
+
+  const minStartDateTimeLocal = useMemo(() => {
+    const min = new Date(today);
+    min.setDate(min.getDate() + 1);
+    min.setHours(0, 0, 0, 0);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${min.getFullYear()}-${pad(min.getMonth() + 1)}-${pad(min.getDate())}T00:00`;
+  }, [today]);
 
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
@@ -53,6 +78,17 @@ export default function CalendarSection() {
       setLoading(false);
     }
   }, [currentMonth, currentYear]);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (openMenuEventId && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuEventId(null);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [openMenuEventId]);
 
   useEffect(() => {
     loadEvents();
@@ -101,8 +137,7 @@ export default function CalendarSection() {
   const upcomingEvents = useMemo(() => {
     return events
       .filter(e => new Date(e.eventDate) >= today)
-      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
-      .slice(0, 5);
+      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
   }, [events, today]);
 
   const prevMonth = () => setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
@@ -112,7 +147,13 @@ export default function CalendarSection() {
     if (!newEvent.title || !newEvent.eventDate) return;
     setSubmitting(true);
     try {
-      await eventsAPI.createEvent(newEvent);
+      await eventsAPI.createEvent({
+        title: newEvent.title,
+        eventDate: newEvent.eventDate,
+        description: newEvent.description || undefined,
+        endDate: newEvent.endDate || undefined,
+        location: newEvent.location || undefined,
+      });
       setShowAddModal(false);
       setNewEvent({ title: '', description: '', eventDate: '', endDate: '', location: '' });
       loadEvents();
@@ -121,6 +162,100 @@ export default function CalendarSection() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const toInputDateTime = (value?: string) => {
+    if (!value) return '';
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return '';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  };
+
+  const openEdit = (event: CalendarEvent) => {
+    setOpenMenuEventId(null);
+    setEditEventId(event.id);
+    setEditEvent({
+      title: event.title || '',
+      description: event.description || '',
+      eventDate: toInputDateTime(event.eventDate),
+      endDate: toInputDateTime(event.endDate),
+      location: event.location || '',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateEvent = async () => {
+    if (!editEventId || !editEvent.title || !editEvent.eventDate) return;
+    const id = editEventId;
+    setSubmitting(true);
+    try {
+      const payload = {
+        ...editEvent,
+        endDate: editEvent.endDate || undefined,
+        description: editEvent.description || undefined,
+        location: editEvent.location || undefined,
+      };
+      const res = await eventsAPI.updateEvent(id, payload);
+      const updated: CalendarEvent = res.data;
+
+      setEvents(prev => prev.map(e => (e.id === updated.id ? { ...e, ...updated } : e)));
+
+      if (updated.eventDate) {
+        const dt = new Date(updated.eventDate);
+        if (!Number.isNaN(dt.getTime())) {
+          setCurrentDate(new Date(dt.getFullYear(), dt.getMonth(), 1));
+        }
+      }
+
+      setShowEditModal(false);
+      setEditEventId(null);
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to update event');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openDeleteModal = (event: CalendarEvent) => {
+    setOpenMenuEventId(null);
+    setDeleteTarget(event);
+    setDeleteStep(1);
+    setDeleteTyped('');
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (submitting) return;
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+    setDeleteStep(1);
+    setDeleteTyped('');
+  };
+
+  const continueDelete = () => {
+    setDeleteStep(2);
+    setDeleteTyped('');
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    if (deleteTyped.trim().toUpperCase() !== 'DELETE') return;
+    setSubmitting(true);
+    try {
+      await eventsAPI.deleteEvent(deleteTarget.id);
+      closeDeleteModal();
+      loadEvents();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete event');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openDetails = (event: CalendarEvent) => {
+    setDetailsEvent(event);
+    setShowDetailsModal(true);
   };
 
   const isToday = (date: Date) => date.toDateString() === today.toDateString();
@@ -243,7 +378,7 @@ export default function CalendarSection() {
           </p>
         </div>
 
-        <div className="space-y-3 flex-1">
+        <div className={`space-y-3 flex-1 overflow-x-hidden ${upcomingEvents.length > 5 ? 'max-h-[420px] overflow-y-auto' : ''}`}>
           {loading ? (
             <div className="flex items-center justify-center py-10">
               <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500/30 border-t-orange-500"></div>
@@ -256,7 +391,13 @@ export default function CalendarSection() {
             upcomingEvents.map(event => (
               <div
                 key={event.id}
-                className={`rounded-xl p-3 transition-colors ${d ? 'bg-white/5 border border-orange-500/10 hover:border-orange-500/30' : 'bg-orange-50 border border-orange-100 hover:border-orange-300'}`}
+                className={`relative rounded-xl p-3 transition-colors ${d ? 'bg-white/5 border border-orange-500/10 hover:border-orange-500/30' : 'bg-orange-50 border border-orange-100 hover:border-orange-300'}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => openDetails(event)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') openDetails(event);
+                }}
               >
                 <div className="flex items-start gap-3">
                   <div className={`w-10 h-10 rounded-lg flex-shrink-0 flex flex-col items-center justify-center text-center ${d ? 'bg-orange-500/20' : 'bg-orange-100'}`}>
@@ -278,6 +419,67 @@ export default function CalendarSection() {
                       </span>
                     )}
                   </div>
+
+                  {/* 3-dot menu */}
+                  {event.departmentId && user?.departmentId && event.departmentId === user.departmentId ? (
+                    <div
+                      className="relative"
+                      ref={openMenuEventId === event.id ? menuRef : undefined}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => e.stopPropagation()}
+                    >
+                    <button
+                      type="button"
+                      onClick={() => setOpenMenuEventId(prev => (prev === event.id ? null : event.id))}
+                      className={`p-2 rounded-lg transition-colors ${d ? 'text-gray-300 hover:bg-white/10' : 'text-gray-600 hover:bg-orange-100'}`}
+                      aria-label="Event actions"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                      </svg>
+                    </button>
+
+                    {openMenuEventId === event.id && (
+                      <div className={`absolute right-0 mt-2 w-36 rounded-xl overflow-hidden z-50 ${d ? 'bg-gray-900 border border-orange-500/20' : 'bg-white border border-gray-200 shadow-xl'}`}>
+                        <button
+                          type="button"
+                          onClick={() => openEdit(event)}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${d ? 'text-gray-200 hover:bg-white/10' : 'text-gray-700 hover:bg-gray-50'}`}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openDeleteModal(event)}
+                          className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${d ? 'text-red-300 hover:bg-red-500/10' : 'text-red-600 hover:bg-red-50'}`}
+                          disabled={submitting}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 11v6M14 11v6" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m-7 0h8m-8 0V5a2 2 0 012-2h4a2 2 0 012 2v2" />
+                          </svg>
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    )}
+                    </div>
+                  ) : (
+                    <div
+                      className={`p-2 rounded-lg ${d ? 'text-gray-600' : 'text-gray-400'}`}
+                      title="You can only edit events from your department"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5 9 6.343 9 8s1.343 3 3 3z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11h.01M17 16.5a4.5 4.5 0 00-9 0V18h9v-1.5z" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
@@ -355,6 +557,7 @@ export default function CalendarSection() {
                     type="datetime-local"
                     value={newEvent.eventDate}
                     onChange={e => setNewEvent(p => ({ ...p, eventDate: e.target.value }))}
+                    min={minStartDateTimeLocal}
                     className={`w-full px-3 py-2 rounded-lg text-sm ${d ? 'bg-white/10 border border-white/20 text-white' : 'bg-gray-50 border border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-orange-500`}
                   />
                 </div>
@@ -364,6 +567,7 @@ export default function CalendarSection() {
                     type="datetime-local"
                     value={newEvent.endDate}
                     onChange={e => setNewEvent(p => ({ ...p, endDate: e.target.value }))}
+                    min={newEvent.eventDate || minStartDateTimeLocal}
                     className={`w-full px-3 py-2 rounded-lg text-sm ${d ? 'bg-white/10 border border-white/20 text-white' : 'bg-gray-50 border border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-orange-500`}
                   />
                 </div>
@@ -393,6 +597,252 @@ export default function CalendarSection() {
                 className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-semibold rounded-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {submitting ? 'Creating...' : 'Create Event'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal (2-step) */}
+      {showDeleteModal && deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={closeDeleteModal}>
+          <div
+            className={`w-full max-w-md rounded-2xl p-6 ${d ? 'bg-gray-900 border border-orange-500/20' : 'bg-white shadow-2xl border border-orange-200/60'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${d ? 'bg-red-500/10 border border-red-500/20' : 'bg-red-50 border border-red-200'}`}>
+                <span className={d ? 'text-red-300' : 'text-red-600'}>🗑️</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className={`text-lg font-bold ${d ? 'text-white' : 'text-gray-900'}`}>Delete Event</h3>
+                <p className={`text-sm mt-1 ${d ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {deleteStep === 1 ? 'This action cannot be undone.' : 'Type DELETE to confirm.'}
+                </p>
+              </div>
+            </div>
+
+            <div className={`mt-4 rounded-xl p-4 ${d ? 'bg-white/5 border border-white/10' : 'bg-orange-50/60 border border-orange-200/60'}`}>
+              <p className={`text-sm font-semibold break-all overflow-hidden ${d ? 'text-white' : 'text-gray-900'}`}>{deleteTarget.title}</p>
+              <p className={`text-xs mt-1 ${d ? 'text-gray-400' : 'text-gray-600'}`}>{new Date(deleteTarget.eventDate).toLocaleString()}</p>
+            </div>
+
+            {deleteStep === 2 && (
+              <div className="mt-4">
+                <label className={`block text-xs font-semibold mb-2 ${d ? 'text-gray-300' : 'text-gray-700'}`}>Confirmation</label>
+                <input
+                  value={deleteTyped}
+                  onChange={(e) => setDeleteTyped(e.target.value)}
+                  placeholder="Type DELETE"
+                  className={`w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 ${d ? 'bg-white/10 border border-white/20 text-white' : 'bg-white border border-orange-200 text-gray-900'}`}
+                />
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={submitting}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                  d
+                    ? 'text-gray-200 hover:bg-white/10'
+                    : 'text-gray-700 hover:bg-gray-100'
+                } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Cancel
+              </button>
+
+              {deleteStep === 1 ? (
+                <button
+                  type="button"
+                  onClick={continueDelete}
+                  disabled={submitting}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                    d
+                      ? 'bg-orange-500/20 border border-orange-500/30 text-orange-200 hover:bg-orange-500/30'
+                      : 'bg-orange-500/15 border border-orange-300/60 text-orange-700 hover:bg-orange-500/20'
+                  } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  Continue
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  disabled={submitting || deleteTyped.trim().toUpperCase() !== 'DELETE'}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                    submitting || deleteTyped.trim().toUpperCase() !== 'DELETE'
+                      ? 'opacity-50 cursor-not-allowed bg-red-600/40 text-white'
+                      : d
+                        ? 'bg-red-500/20 border border-red-500/30 text-red-200 hover:bg-red-500/30'
+                        : 'bg-red-600 text-white hover:bg-red-700'
+                  }`}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Event Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowEditModal(false)}>
+          <div
+            className={`w-full max-w-md rounded-2xl p-6 ${d ? 'bg-gray-900 border border-orange-500/20' : 'bg-white shadow-2xl'}`}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className={`text-lg font-bold mb-4 ${d ? 'text-white' : 'text-gray-900'}`}>Edit Event</h3>
+
+            <div className="space-y-3">
+              <div>
+                <label className={`block text-xs font-semibold mb-1 ${d ? 'text-gray-300' : 'text-gray-700'}`}>Title *</label>
+                <input
+                  type="text"
+                  value={editEvent.title}
+                  onChange={e => setEditEvent(p => ({ ...p, title: e.target.value }))}
+                  className={`w-full px-3 py-2 rounded-lg text-sm ${d ? 'bg-white/10 border border-white/20 text-white' : 'bg-gray-50 border border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                />
+              </div>
+              <div>
+                <label className={`block text-xs font-semibold mb-1 ${d ? 'text-gray-300' : 'text-gray-700'}`}>Description</label>
+                <textarea
+                  value={editEvent.description}
+                  onChange={e => setEditEvent(p => ({ ...p, description: e.target.value }))}
+                  className={`w-full px-3 py-2 rounded-lg text-sm resize-none h-20 ${d ? 'bg-white/10 border border-white/20 text-white' : 'bg-gray-50 border border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={`block text-xs font-semibold mb-1 ${d ? 'text-gray-300' : 'text-gray-700'}`}>Start Date *</label>
+                  <input
+                    type="datetime-local"
+                    value={editEvent.eventDate}
+                    onChange={e => setEditEvent(p => ({ ...p, eventDate: e.target.value }))}
+                    min={minStartDateTimeLocal}
+                    className={`w-full px-3 py-2 rounded-lg text-sm ${d ? 'bg-white/10 border border-white/20 text-white' : 'bg-gray-50 border border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  />
+                </div>
+                <div>
+                  <label className={`block text-xs font-semibold mb-1 ${d ? 'text-gray-300' : 'text-gray-700'}`}>End Date</label>
+                  <input
+                    type="datetime-local"
+                    value={editEvent.endDate}
+                    onChange={e => setEditEvent(p => ({ ...p, endDate: e.target.value }))}
+                    min={editEvent.eventDate || minStartDateTimeLocal}
+                    className={`w-full px-3 py-2 rounded-lg text-sm ${d ? 'bg-white/10 border border-white/20 text-white' : 'bg-gray-50 border border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className={`block text-xs font-semibold mb-1 ${d ? 'text-gray-300' : 'text-gray-700'}`}>Location</label>
+                <input
+                  type="text"
+                  value={editEvent.location}
+                  onChange={e => setEditEvent(p => ({ ...p, location: e.target.value }))}
+                  className={`w-full px-3 py-2 rounded-lg text-sm ${d ? 'bg-white/10 border border-white/20 text-white' : 'bg-gray-50 border border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-5">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${d ? 'text-gray-400 hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateEvent}
+                disabled={submitting || !editEvent.title || !editEvent.eventDate}
+                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-semibold rounded-lg hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {submitting ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Event Details Modal */}
+      {showDetailsModal && detailsEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowDetailsModal(false)}>
+          <div
+            className={`w-full max-w-lg rounded-2xl p-6 max-h-[85vh] overflow-y-auto ${d ? 'bg-gray-900 border border-orange-500/20' : 'bg-white shadow-2xl'}`}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className={`text-xl font-bold break-all ${d ? 'text-white' : 'text-gray-900'}`}>{detailsEvent.title}</h3>
+                <p className={`text-sm mt-1 ${d ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {new Date(detailsEvent.eventDate).toLocaleString('en-US', {
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  })}
+                  {detailsEvent.endDate
+                    ? ` – ${new Date(detailsEvent.endDate).toLocaleString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true,
+                      })}`
+                    : ''}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDetailsModal(false)}
+                className={`p-2 rounded-lg transition-colors ${d ? 'text-gray-300 hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {detailsEvent.location && (
+                <div className={`rounded-xl p-3 ${d ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+                  <p className={`text-xs font-semibold ${d ? 'text-gray-300' : 'text-gray-700'}`}>Location</p>
+                  <p className={`text-sm mt-0.5 break-words ${d ? 'text-white' : 'text-gray-900'}`}>📍 {detailsEvent.location}</p>
+                </div>
+              )}
+
+              {(detailsEvent.departmentName || detailsEvent.adminName) && (
+                <div className={`rounded-xl p-3 ${d ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    {detailsEvent.departmentName && (
+                      <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-semibold ${d ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20' : 'bg-orange-100 text-orange-700 border border-orange-200'}`}>
+                        {detailsEvent.departmentName}
+                      </span>
+                    )}
+                    {detailsEvent.adminName && (
+                      <p className={`text-xs ${d ? 'text-gray-400' : 'text-gray-600'}`}>Created by {detailsEvent.adminName}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className={`rounded-xl p-3 ${d ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+                <p className={`text-xs font-semibold ${d ? 'text-gray-300' : 'text-gray-700'}`}>Description</p>
+                <p className={`text-sm mt-0.5 whitespace-pre-wrap break-all ${d ? 'text-white' : 'text-gray-900'}`}>
+                  {detailsEvent.description?.trim() ? detailsEvent.description : '—'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-5">
+              <button
+                type="button"
+                onClick={() => setShowDetailsModal(false)}
+                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-semibold rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
+              >
+                Close
               </button>
             </div>
           </div>

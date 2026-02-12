@@ -41,7 +41,15 @@ export const authAPI = {
 };
 
 export const postsAPI = {
-  getPosts: () => api.get('/posts/public'),
+  getPosts: (params?: { limit?: number; offset?: number; departmentId?: string }) => api.get('/posts/public', { params }),
+  getDepartmentPosts: (params?: { limit?: number; offset?: number }) => api.get('/posts', { params }),
+  getPostById: (id: string) => api.get(`/posts/${id}`),
+  uploadDocument: (formData: FormData) =>
+    api.post('/posts/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
   createPost: (data: { caption: string; imageUrl?: string }) =>
     api.post('/posts', data),
   updatePost: (id: string, data: { caption: string; imageUrl?: string }) =>

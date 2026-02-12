@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { postsAPI } from '@/lib/api';
 import CalendarSection from './CalendarSection';
+import UploadPdfSection from './UploadPdfSection';
 
 // Relative time helper
 function timeAgo(dateStr: string) {
@@ -47,42 +49,42 @@ function useColors() {
   const d = theme === 'dark';
   return {
     // Surfaces
-    sidebar: d ? 'bg-black/60 backdrop-blur-xl border-r border-orange-500/20' : 'bg-white/90 backdrop-blur-xl border-r border-gray-200 shadow-sm',
-    header: d ? 'bg-black/40 backdrop-blur-xl border-b border-orange-500/10' : 'bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-sm',
-    card: d ? 'bg-black/30 border border-orange-500/10 hover:border-orange-500/30 hover:shadow-xl hover:shadow-orange-900/10' : 'bg-white border border-gray-200 hover:border-orange-300 hover:shadow-lg shadow-sm',
-    panel: d ? 'backdrop-blur-xl bg-black/30 border border-orange-500/15' : 'backdrop-blur-xl bg-white border border-gray-200 shadow-sm',
-    statCard: d ? 'bg-orange-500/5 border border-orange-500/10' : 'bg-orange-50 border border-orange-200/60',
-    emptyIcon: d ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-orange-50 border border-orange-200',
+    sidebar: d ? 'bg-black/60 backdrop-blur-xl border-r border-orange-500/20' : 'bg-white/70 backdrop-blur-xl border-r border-orange-200/60 shadow-sm',
+    header: d ? 'bg-black/40 backdrop-blur-xl border-b border-orange-500/10' : 'bg-white/60 backdrop-blur-xl border-b border-orange-200/50 shadow-sm',
+    card: d ? 'bg-black/30 border border-orange-500/10 hover:border-orange-500/30 hover:shadow-xl hover:shadow-orange-900/10' : 'bg-white/70 border border-orange-200/40 hover:border-orange-300/70 shadow-sm hover:shadow-md',
+    panel: d ? 'backdrop-blur-xl bg-black/30 border border-orange-500/15' : 'backdrop-blur-xl bg-white/70 border border-orange-200/50 shadow-sm',
+    statCard: d ? 'bg-orange-500/5 border border-orange-500/10' : 'bg-white/70 border border-orange-200/60',
+    emptyIcon: d ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-white/70 border border-orange-200/60',
     searchInput: d
       ? 'bg-white/5 border border-orange-500/15 text-white placeholder-gray-500 focus:border-orange-500/40 focus:ring-orange-500/20'
-      : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:ring-orange-200',
-    viewToggle: d ? 'bg-white/5 border border-orange-500/15' : 'bg-gray-100 border border-gray-200',
-    viewActive: d ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-600',
-    viewInactive: d ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600',
+      : 'bg-white/70 border border-orange-200/60 text-gray-900 placeholder-gray-400 focus:border-orange-400 focus:ring-orange-200',
+    viewToggle: d ? 'bg-white/5 border border-orange-500/15' : 'bg-white/60 border border-orange-200/60',
+    viewActive: d ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-500/15 text-orange-700',
+    viewInactive: d ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700',
 
     // Text
-    heading: d ? 'text-white' : 'text-gray-900',
-    text: d ? 'text-gray-200' : 'text-gray-700',
-    textSecondary: d ? 'text-gray-400' : 'text-gray-500',
-    textMuted: d ? 'text-gray-500' : 'text-gray-400',
+    heading: d ? 'text-white' : 'text-slate-900',
+    text: d ? 'text-gray-200' : 'text-slate-700',
+    textSecondary: d ? 'text-gray-400' : 'text-slate-600',
+    textMuted: d ? 'text-gray-500' : 'text-slate-500',
     sectionLabel: d ? 'text-orange-500/40' : 'text-orange-600/60',
-    emailText: d ? 'text-orange-300/50' : 'text-gray-500',
+    emailText: d ? 'text-orange-300/50' : 'text-slate-500',
     subtitle: d ? 'text-orange-400/50' : 'text-orange-600/50',
 
     // Borders
-    border: d ? 'border-orange-500/10' : 'border-gray-200',
-    borderLight: d ? 'border-orange-500/5' : 'border-gray-100',
+    border: d ? 'border-orange-500/10' : 'border-orange-200/60',
+    borderLight: d ? 'border-orange-500/5' : 'border-orange-100/60',
 
     // Badges
-    deptBadge: d ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20' : 'bg-orange-100 text-orange-700 border border-orange-200',
-    pdfBadge: d ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200',
-    countBadge: d ? 'bg-orange-500/10 text-orange-400/70' : 'bg-orange-100 text-orange-600',
-    navInactive: d ? 'text-gray-400 hover:bg-orange-500/10 hover:text-orange-300' : 'text-gray-600 hover:bg-orange-50 hover:text-orange-600',
+    deptBadge: d ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20' : 'bg-orange-500/10 text-orange-700 border border-orange-200/70',
+    pdfBadge: d ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-500/10 border border-blue-200/60',
+    countBadge: d ? 'bg-orange-500/10 text-orange-400/70' : 'bg-orange-500/10 text-orange-700',
+    navInactive: d ? 'text-gray-400 hover:bg-orange-500/10 hover:text-orange-300' : 'text-slate-600 hover:bg-orange-500/10 hover:text-orange-700',
 
     // Buttons
     logoutBtn: d
       ? 'bg-red-600/10 hover:bg-red-600 border border-red-500/20 hover:border-red-500 text-red-400 hover:text-white'
-      : 'bg-red-50 hover:bg-red-600 border border-red-200 hover:border-red-500 text-red-500 hover:text-white',
+      : 'bg-white/70 hover:bg-red-600 border border-red-200/70 hover:border-red-500 text-red-600 hover:text-white',
     clearSearch: d ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600',
     actionBtn: d ? 'text-gray-500 hover:text-orange-400 hover:bg-orange-500/10' : 'text-gray-400 hover:text-orange-600 hover:bg-orange-50',
 
@@ -94,16 +96,52 @@ function useColors() {
     statLabel: d ? 'text-gray-500' : 'text-gray-500',
 
     // PDF card
-    pdfCard: d ? 'bg-gradient-to-br from-blue-600/10 to-orange-600/10 border border-orange-500/20' : 'bg-gradient-to-br from-blue-50 to-orange-50 border border-gray-200',
-    pdfIcon: d ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200',
+    pdfCard: d ? 'bg-gradient-to-br from-blue-600/10 to-orange-600/10 border border-orange-500/20' : 'bg-gradient-to-br from-blue-500/10 to-orange-500/10 border border-orange-200/60',
+    pdfIcon: d ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-500/10 border border-blue-200/60',
     pdfLabel: d ? 'text-orange-300' : 'text-orange-600',
 
     // Iframe border
     iframeBorder: d ? 'border border-white/10' : 'border border-gray-200',
 
     // Theme toggle
-    toggleBg: d ? 'bg-white/5 border border-orange-500/15' : 'bg-gray-100 border border-gray-200',
+    toggleBg: d ? 'bg-white/5 border border-orange-500/15' : 'bg-white/60 border border-orange-200/60',
   };
+}
+
+type PostItem = {
+  id: string;
+  caption: string;
+  imageUrl: string;
+  createdAt: string;
+  adminName?: string;
+  departmentName?: string;
+  departmentId?: string;
+  hasMedia?: boolean;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function normalizePosts(data: unknown): PostItem[] {
+  if (!Array.isArray(data)) return [];
+  const out: PostItem[] = [];
+  for (const item of data) {
+    if (!isRecord(item)) continue;
+    const id = typeof item.id === 'string' ? item.id : '';
+    if (!id) continue;
+    out.push({
+      id,
+      caption: typeof item.caption === 'string' ? item.caption : String(item.caption ?? ''),
+      imageUrl: typeof item.imageUrl === 'string' ? item.imageUrl : '',
+      createdAt: typeof item.createdAt === 'string' ? item.createdAt : new Date().toISOString(),
+      adminName: typeof item.adminName === 'string' ? item.adminName : undefined,
+      departmentName: typeof item.departmentName === 'string' ? item.departmentName : undefined,
+      departmentId: typeof item.departmentId === 'string' ? item.departmentId : undefined,
+      hasMedia: typeof item.hasMedia === 'boolean' ? item.hasMedia : undefined,
+    });
+  }
+  return out;
 }
 
 export default function DashboardPage() {
@@ -111,12 +149,20 @@ export default function DashboardPage() {
   const { user, logout, isAuthenticated } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const c = useColors();
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<PostItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('posts');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [mediaPreview, setMediaPreview] = useState<{ type: 'image' | 'pdf'; src: string } | null>(null);
+  const [newCaption, setNewCaption] = useState('');
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [newImagePreviewUrl, setNewImagePreviewUrl] = useState<string>('');
+  const [posting, setPosting] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const [crop, setCrop] = useState<Crop>({ unit: '%', x: 10, y: 10, width: 80, height: 80 });
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -126,10 +172,23 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, router]);
 
+  useEffect(() => {
+    return () => {
+      if (newImagePreviewUrl) URL.revokeObjectURL(newImagePreviewUrl);
+    };
+  }, [newImagePreviewUrl]);
+
   const fetchPosts = async () => {
     try {
-      const response = await postsAPI.getPosts();
-      setPosts(response.data);
+      let response;
+      try {
+        response = await postsAPI.getPosts({ limit: 20, offset: 0 });
+      } catch {
+        response = await postsAPI.getDepartmentPosts({ limit: 20, offset: 0 });
+      }
+
+      const basePosts = normalizePosts(response.data);
+      setPosts(basePosts);
     } catch (err) {
       console.error('Failed to fetch posts', err);
     } finally {
@@ -142,12 +201,131 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
+  const onPickImage = (file: File | null) => {
+    setNewImageFile(file);
+    if (newImagePreviewUrl) URL.revokeObjectURL(newImagePreviewUrl);
+    setNewImagePreviewUrl(file ? URL.createObjectURL(file) : '');
+    setCrop({ unit: '%', x: 10, y: 10, width: 80, height: 80 });
+    setCompletedCrop(null);
+  };
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+
+  const blobToDataUrl = (blob: Blob) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('Failed to read blob'));
+      reader.readAsDataURL(blob);
+    });
+
+  const getCroppedBlobFromImg = async (image: HTMLImageElement, area: PixelCrop): Promise<Blob> => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('No canvas context');
+
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+
+    canvas.width = Math.max(1, Math.round(area.width * scaleX));
+    canvas.height = Math.max(1, Math.round(area.height * scaleY));
+
+    ctx.drawImage(
+      image,
+      area.x * scaleX,
+      area.y * scaleY,
+      area.width * scaleX,
+      area.height * scaleY,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    const blob: Blob = await new Promise((resolve, reject) => {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Failed to crop image'))), 'image/jpeg', 0.92);
+    });
+    return blob;
+  };
+
+  const submitPost = async () => {
+    if (posting) return;
+    const caption = newCaption.trim();
+    if (!caption) return;
+    try {
+      setPosting(true);
+
+      let imageUrl: string | undefined;
+      if (newImageFile) {
+        if (!newImageFile.type.startsWith('image/')) {
+          alert('Please choose a valid image file.');
+          return;
+        }
+        if (newImageFile.size > 5 * 1024 * 1024) {
+          alert('Image must be 5MB or smaller.');
+          return;
+        }
+        const img = imgRef.current;
+        if (img && completedCrop && completedCrop.width > 0 && completedCrop.height > 0) {
+          const croppedBlob = await getCroppedBlobFromImg(img, completedCrop);
+          if (croppedBlob.size > 5 * 1024 * 1024) {
+            alert('Cropped image is still larger than 5MB. Please crop tighter or use a smaller image.');
+            return;
+          }
+          imageUrl = await blobToDataUrl(croppedBlob);
+        } else {
+          imageUrl = await fileToDataUrl(newImageFile);
+        }
+      }
+
+      await postsAPI.createPost({ caption, imageUrl });
+      setNewCaption('');
+      onPickImage(null);
+      await fetchPosts();
+    } catch (err) {
+      console.error('Failed to create post', err);
+      alert('Failed to create post.');
+    } finally {
+      setPosting(false);
+    }
+  };
+
   const toggleExpand = (id: string) => {
     setExpandedPosts(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
+  };
+
+  const openPdfPreview = async (postId: string, pdfSrc?: string) => {
+    try {
+      if (!pdfSrc) return;
+      let resolved = pdfSrc;
+      if (pdfSrc === 'PDF_PLACEHOLDER') {
+        const full = await postsAPI.getPostById(postId);
+        const fullUrl: string = full.data?.imageUrl || '';
+        if (fullUrl.includes('|')) {
+          resolved = fullUrl.split('|')[0];
+        } else {
+          resolved = fullUrl;
+        }
+      }
+      if (!resolved) return;
+      setMediaPreview({ type: 'pdf', src: resolved });
+    } catch (err) {
+      console.error('Failed to open PDF preview', err);
+    }
   };
 
   const filteredPosts = useMemo(() => {
@@ -389,6 +567,81 @@ export default function DashboardPage() {
         <div className="flex-1 p-8 overflow-y-auto">
           {activeTab === 'posts' && (
             <>
+              <div className="mb-6">
+                <div className={`${c.panel} rounded-2xl p-6`}> 
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                      <span className="text-lg">🖼️</span>
+                    </div>
+                    <div>
+                      <h3 className={`${c.heading} font-semibold text-lg`}>Create Post</h3>
+                      <p className={`${c.textMuted} text-sm`}>Share an image with a caption</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className={`${c.textSecondary} text-sm font-medium`}>Caption *</label>
+                      <textarea
+                        value={newCaption}
+                        onChange={(e) => setNewCaption(e.target.value)}
+                        rows={4}
+                        placeholder="What's on your mind?"
+                        className={`mt-2 w-full rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 transition-all ${c.searchInput}`}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-orange-500/20 bg-orange-500/5 text-orange-300 text-sm font-medium cursor-pointer hover:bg-orange-500/10 transition-colors">
+                        <span>Choose Image</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => onPickImage(e.target.files?.[0] || null)}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => onPickImage(null)}
+                        className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${theme === 'dark' ? 'text-gray-300 hover:bg-white/5' : 'text-gray-600 hover:bg-gray-100'}`}
+                        disabled={!newImageFile && !newCaption}
+                      >
+                        Clear
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={submitPost}
+                        disabled={posting || !newCaption.trim()}
+                        className={`ml-auto px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${posting || !newCaption.trim() ? 'opacity-50 cursor-not-allowed bg-orange-600/40 text-white' : 'bg-gradient-to-r from-orange-600 to-orange-700 text-white hover:from-orange-500 hover:to-orange-600'}`}
+                      >
+                        {posting ? 'Posting...' : 'Post'}
+                      </button>
+                    </div>
+
+                    {newImagePreviewUrl && (
+                      <div className={`rounded-xl overflow-hidden border ${c.borderLight}`}>
+                        <div className={`w-full ${theme === 'dark' ? 'bg-black/40' : 'bg-gray-100'} flex items-center justify-center p-3`}>
+                          <div className="inline-block leading-none max-w-full">
+                            <ReactCrop crop={crop} onChange={(_, percentCrop) => setCrop(percentCrop)} onComplete={(c) => setCompletedCrop(c)}>
+                              <img
+                                ref={imgRef}
+                                src={newImagePreviewUrl}
+                                alt="Crop"
+                                className="block max-h-[22rem] w-auto max-w-full"
+                              />
+                            </ReactCrop>
+                          </div>
+                        </div>
+                        <div className={`px-4 py-3 ${theme === 'dark' ? 'bg-black/20' : 'bg-white'}`}>
+                          <p className={`${c.textMuted} text-[11px]`}>Resize the crop box using the corner handles, or drag to reposition.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
               {filteredPosts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <div className={`w-20 h-20 rounded-2xl ${c.emptyIcon} flex items-center justify-center mb-5`}>
@@ -470,16 +723,16 @@ export default function DashboardPage() {
 
                         {/* Media */}
                         {post.imageUrl && (
-                          <div className="px-5 pb-4">
+                          <div className="px-5 pb-5">
                             {isPDF && thumbnailUrl ? (
                               <div className={`relative rounded-xl overflow-hidden border ${c.borderLight} group/media`}>
-                                <img src={thumbnailUrl} alt="PDF Thumbnail" className="w-full h-auto max-h-96 object-cover group-hover/media:scale-[1.02] transition-transform duration-500" loading="lazy" />
+                                <img src={thumbnailUrl} alt="PDF Thumbnail" className="w-full h-auto max-h-96 object-cover group-hover/media:scale-[1.02] transition-transform duration-500 cursor-zoom-in" loading="lazy" onClick={() => openPdfPreview(post.id, pdfUrl)} />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/media:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
                                   <span className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white text-xs font-medium border border-white/20">View PDF</span>
                                 </div>
                               </div>
                             ) : isPDF ? (
-                              <div className={`${c.pdfCard} rounded-xl p-8 text-center`}>
+                              <div className={`${c.pdfCard} rounded-xl p-8 text-center cursor-pointer`} onClick={() => openPdfPreview(post.id, pdfUrl)}>
                                 <div className={`w-14 h-14 mx-auto rounded-xl ${c.pdfIcon} flex items-center justify-center mb-3`}>
                                   <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                                 </div>
@@ -488,30 +741,11 @@ export default function DashboardPage() {
                               </div>
                             ) : (
                               <div className={`relative rounded-xl overflow-hidden border ${c.borderLight} group/media`}>
-                                <img src={post.imageUrl} alt="Post image" className="w-full h-auto max-h-96 object-cover group-hover/media:scale-[1.02] transition-transform duration-500" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                <img src={post.imageUrl} alt="Post image" className="w-full h-auto max-h-96 object-cover group-hover/media:scale-[1.02] transition-transform duration-500 cursor-zoom-in" loading="lazy" onClick={() => setMediaPreview({ type: 'image', src: post.imageUrl })} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                               </div>
                             )}
                           </div>
                         )}
-
-                        {/* Card Footer */}
-                        <div className={`px-5 py-3 ${c.borderLight} border-t flex items-center justify-between`}>
-                          <div className={`flex items-center gap-1 ${c.textMuted}`}>
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <span className="text-xs">{new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                          </div>
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <button className={`p-2 rounded-lg ${c.actionBtn} transition-all`} title="Share">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-                            </button>
-                            <button className={`p-2 rounded-lg ${c.actionBtn} transition-all`} title="Bookmark">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-                            </button>
-                            <button className={`p-2 rounded-lg ${c.actionBtn} transition-all`} title="More">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
-                            </button>
-                          </div>
-                        </div>
                       </article>
                     );
                   })}
@@ -525,17 +759,24 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'uploadPdf' && (
-            <div className="max-w-2xl mx-auto">
-              <div className={`${c.panel} rounded-2xl p-10 text-center transition-colors duration-300`}>
-                <div className={`w-16 h-16 rounded-2xl ${c.emptyIcon} flex items-center justify-center mx-auto mb-5`}>
-                  <svg className="w-8 h-8 text-orange-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                </div>
-                <h3 className={`text-lg font-semibold ${c.heading} mb-2`}>Upload PDF Documents</h3>
-                <p className={`${c.textMuted} text-sm`}>PDF upload functionality coming soon...</p>
-              </div>
-            </div>
+            <UploadPdfSection />
           )}
         </div>
+
+        {mediaPreview && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setMediaPreview(null)}>
+            <div className={`relative w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden ${theme === 'dark' ? 'bg-black/50 border border-orange-500/20' : 'bg-white border border-gray-200'}`} onClick={(e) => e.stopPropagation()}>
+              <button className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/50 text-white hover:bg-orange-600 transition-colors" onClick={() => setMediaPreview(null)}>
+                ✕
+              </button>
+              {mediaPreview.type === 'image' ? (
+                <img src={mediaPreview.src} alt="Preview" className="w-full h-auto max-h-[90vh] object-contain" />
+              ) : (
+                <iframe src={mediaPreview.src} className="w-full h-[85vh]" title="PDF Preview" />
+              )}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

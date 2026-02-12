@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   createEvent,
   getEvents,
+  getPublicEvents,
   getEventById,
   updateEvent,
   deleteEvent,
@@ -9,6 +10,9 @@ import {
 import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = Router();
+
+// Public route - no authentication required (used by viewer.html)
+router.get('/public', getPublicEvents);
 
 // All event routes require authentication
 router.use(authenticateToken);

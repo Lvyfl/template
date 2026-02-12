@@ -13,21 +13,25 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #000000 0%, #1a0a00 50%, #2d1400 100%);
             min-height: 100vh;
             display: flex;
+            color: #e5e5e5;
+            overflow-x: hidden;
         }
 
         /* Sidebar */
         .sidebar {
             width: 260px;
-            background: #2d2d2d;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
             display: flex;
             flex-direction: column;
             padding: 20px 0;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
+            border-right: 1px solid rgba(249, 115, 22, 0.2);
         }
 
         .logo-section {
@@ -39,13 +43,14 @@
         .logo-icon {
             width: 80px;
             height: 80px;
-            background: #ff5722;
+            background: linear-gradient(135deg, #f97316, #ea580c);
             border-radius: 12px;
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.5rem;
+            box-shadow: 0 12px 30px rgba(249, 115, 22, 0.25);
         }
 
         .logo-text {
@@ -57,7 +62,7 @@
 
         .logo-subtitle {
             font-size: 0.85rem;
-            color: #ff5722;
+            color: rgba(249, 115, 22, 0.7);
             text-transform: uppercase;
             font-weight: 600;
         }
@@ -74,21 +79,21 @@
             padding: 12px 15px;
             margin-bottom: 5px;
             border-radius: 8px;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.72);
             cursor: pointer;
             transition: all 0.2s;
             font-size: 0.95rem;
         }
 
         .nav-item:hover {
-            background: rgba(255, 87, 34, 0.1);
+            background: rgba(249, 115, 22, 0.12);
             color: white;
         }
 
         .nav-item.active {
-            background: #ff5722;
+            background: linear-gradient(90deg, rgba(234, 88, 12, 1) 0%, rgba(194, 65, 12, 1) 100%);
             color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 24px rgba(234, 88, 12, 0.25);
         }
 
         .nav-icon {
@@ -100,7 +105,7 @@
             margin-left: 260px;
             flex: 1;
             display: flex;
-            padding: 20px;
+            padding: 28px;
             gap: 20px;
         }
 
@@ -120,7 +125,7 @@
         .page-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #333;
+            color: #ffffff;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -131,17 +136,19 @@
             align-items: center;
             gap: 8px;
             padding: 10px 20px;
-            background: white;
-            border: 1px solid #ddd;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(249, 115, 22, 0.25);
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.95rem;
             transition: all 0.2s;
+            color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
         }
 
         .filter-btn:hover {
-            background: #f8f8f8;
-            border-color: #ff5722;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(249, 115, 22, 0.45);
         }
 
         .filter-dropdown {
@@ -153,12 +160,15 @@
             display: none;
             position: absolute;
             right: 0;
-            background: white;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(16px);
             min-width: 200px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.45);
             border-radius: 8px;
             z-index: 1000;
             margin-top: 5px;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            color: rgba(255,255,255,0.9);
         }
 
         .filter-content.show {
@@ -172,7 +182,7 @@
         }
 
         .filter-option:hover {
-            background: #f5f5f5;
+            background: rgba(249, 115, 22, 0.12);
         }
 
         .filter-option:first-child {
@@ -191,11 +201,17 @@
         }
 
         .post-card {
-            background: white;
-            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.32);
+            backdrop-filter: blur(14px);
+            border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid rgba(249, 115, 22, 0.12);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.28);
             animation: fadeIn 0.3s ease;
+        }
+
+        .post-card:hover {
+            border-color: rgba(249, 115, 22, 0.28);
         }
 
         @keyframes fadeIn {
@@ -213,7 +229,7 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: #ff5722;
+            background: linear-gradient(135deg, #f97316, #ea580c);
             color: white;
             display: flex;
             align-items: center;
@@ -236,12 +252,13 @@
 
         .author-name {
             font-weight: 600;
-            color: #333;
+            color: #ffffff;
             font-size: 0.95rem;
         }
 
         .urgent-badge {
-            background: #d84315;
+            background: rgba(249, 115, 22, 0.18);
+            border: 1px solid rgba(249, 115, 22, 0.25);
             color: white;
             padding: 3px 12px;
             border-radius: 12px;
@@ -252,13 +269,13 @@
 
         .post-meta {
             font-size: 0.85rem;
-            color: #666;
+            color: rgba(156, 163, 175, 0.95);
         }
 
         .post-body {
             margin-bottom: 15px;
             line-height: 1.6;
-            color: #333;
+            color: rgba(229, 229, 229, 0.95);
         }
 
         .post-image {
@@ -267,6 +284,7 @@
             object-fit: cover;
             border-radius: 8px;
             margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .post-attachment {
@@ -274,10 +292,11 @@
             align-items: center;
             gap: 8px;
             padding: 10px;
-            background: #f5f5f5;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(249, 115, 22, 0.15);
             border-radius: 6px;
             margin: 10px 0;
-            color: #ff5722;
+            color: rgba(249, 115, 22, 0.95);
             font-size: 0.9rem;
         }
 
@@ -286,8 +305,8 @@
             align-items: center;
             gap: 15px;
             padding-top: 12px;
-            border-top: 1px solid #f0f0f0;
-            color: #666;
+            border-top: 1px solid rgba(249, 115, 22, 0.12);
+            color: rgba(156, 163, 175, 0.95);
             font-size: 0.9rem;
         }
 
@@ -300,7 +319,7 @@
         }
 
         .like-btn:hover {
-            color: #ff5722;
+            color: rgba(249, 115, 22, 0.95);
         }
 
         /* Calendar Sidebar */
@@ -312,17 +331,19 @@
         }
 
         .calendar-card {
-            background: white;
-            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.32);
+            backdrop-filter: blur(14px);
+            border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid rgba(249, 115, 22, 0.12);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.28);
         }
 
         .calendar-title {
             font-size: 1.25rem;
             font-weight: 600;
             margin-bottom: 20px;
-            color: #333;
+            color: #ffffff;
         }
 
         .calendar-header {
@@ -338,16 +359,16 @@
             font-size: 1.2rem;
             cursor: pointer;
             padding: 5px;
-            color: #666;
+            color: rgba(156, 163, 175, 0.9);
         }
 
         .calendar-nav:hover {
-            color: #ff5722;
+            color: rgba(249, 115, 22, 0.95);
         }
 
         .calendar-month {
             font-weight: 600;
-            color: #333;
+            color: rgba(255, 255, 255, 0.95);
         }
 
         .calendar-grid {
@@ -360,7 +381,7 @@
         .calendar-day-header {
             text-align: center;
             font-size: 0.75rem;
-            color: #666;
+            color: rgba(156, 163, 175, 0.9);
             font-weight: 600;
             padding: 8px 0;
         }
@@ -380,24 +401,24 @@
         }
 
         .calendar-day:hover {
-            background: #f5f5f5;
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .calendar-day.has-event {
-            background: #ffe0d8;
-            color: #ff5722;
+            background: rgba(249, 115, 22, 0.14);
+            color: rgba(249, 115, 22, 0.95);
             font-weight: 600;
         }
 
         .calendar-day.today {
-            background: #ff5722;
+            background: linear-gradient(135deg, #f97316, #ea580c);
             color: white;
             font-weight: 600;
         }
 
         .event-count {
             font-size: 0.6rem;
-            color: #ff5722;
+            color: rgba(249, 115, 22, 0.95);
             margin-top: 3px;
             text-align: center;
             white-space: nowrap;
@@ -411,26 +432,31 @@
         .loading, .error {
             text-align: center;
             padding: 40px 20px;
-            background: white;
-            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.32);
+            border-radius: 16px;
             margin: 20px 0;
+            border: 1px solid rgba(249, 115, 22, 0.12);
+            backdrop-filter: blur(14px);
         }
 
         .loading {
-            color: #666;
+            color: rgba(156, 163, 175, 0.95);
         }
 
         .error {
-            background: #ffebee;
-            color: #c62828;
+            background: rgba(239, 68, 68, 0.12);
+            color: rgba(248, 113, 113, 0.95);
+            border-color: rgba(239, 68, 68, 0.25);
         }
 
         .no-posts {
             text-align: center;
             padding: 60px 20px;
-            background: white;
-            border-radius: 12px;
-            color: #666;
+            background: rgba(0, 0, 0, 0.32);
+            border-radius: 16px;
+            color: rgba(156, 163, 175, 0.95);
+            border: 1px solid rgba(249, 115, 22, 0.12);
+            backdrop-filter: blur(14px);
         }
 
         /* User Menu */
@@ -451,18 +477,18 @@
         }
 
         .login-link {
-            color: #ff5722;
+            color: rgba(249, 115, 22, 0.95);
             text-decoration: none;
             font-size: 0.9rem;
             padding: 8px 16px;
-            border: 1px solid #ff5722;
+            border: 1px solid rgba(249, 115, 22, 0.55);
             border-radius: 6px;
             display: inline-block;
             transition: all 0.2s;
         }
 
         .login-link:hover {
-            background: #ff5722;
+            background: linear-gradient(135deg, #f97316, #ea580c);
             color: white;
         }
 
@@ -490,7 +516,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(10px);
             z-index: 2000;
             align-items: center;
             justify-content: center;
@@ -503,11 +530,13 @@
         .pdf-modal-content {
             width: 90%;
             height: 90%;
-            background: white;
-            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            border: 1px solid rgba(249, 115, 22, 0.2);
         }
 
         .pdf-modal-header {
@@ -515,8 +544,10 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
-            background: #2d2d2d;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(16px);
             color: white;
+            border-bottom: 1px solid rgba(249, 115, 22, 0.12);
         }
 
         .pdf-modal-title {
@@ -535,7 +566,7 @@
 
         .pdf-download-btn {
             padding: 8px 16px;
-            background: #ff5722;
+            background: linear-gradient(135deg, #f97316, #ea580c);
             color: white;
             border: none;
             border-radius: 6px;
@@ -548,12 +579,12 @@
         }
 
         .pdf-download-btn:hover {
-            background: #e64a19;
+            filter: brightness(1.05);
         }
 
         .pdf-close-btn {
             padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 6px;
@@ -568,7 +599,7 @@
 
         .pdf-viewer-container {
             flex: 1;
-            background: #525659;
+            background: rgba(17, 17, 17, 0.95);
             position: relative;
             overflow: auto;
             display: flex;
@@ -605,16 +636,17 @@
             width: 100%;
             max-width: 500px;
             height: auto;
-            border-radius: 8px;
+            border-radius: 12px;
             margin: 15px 0;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .pdf-thumbnail:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
         }
 
         .pdf-badge {
@@ -622,21 +654,81 @@
             align-items: center;
             gap: 8px;
             padding: 10px 16px;
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            color: #1976d2;
+            background: rgba(59, 130, 246, 0.12);
+            color: rgba(147, 197, 253, 1);
             border-radius: 8px;
             font-size: 0.9rem;
             font-weight: 600;
             margin-top: 10px;
             cursor: pointer;
             transition: all 0.2s;
-            border: 2px solid #90caf9;
+            border: 1px solid rgba(59, 130, 246, 0.25);
         }
 
         .pdf-badge:hover {
-            background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+            background: rgba(59, 130, 246, 0.18);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+            box-shadow: 0 10px 24px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Image Preview Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 2100;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .image-modal.show {
+            display: flex;
+        }
+
+        .image-modal-content {
+            position: relative;
+            width: min(95vw, 1100px);
+            max-height: 90vh;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.45);
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+
+        .image-modal-close:hover {
+            background: rgba(249, 115, 22, 0.2);
+            border-color: rgba(249, 115, 22, 0.45);
+        }
+
+        .image-modal-img {
+            width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            display: block;
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .pdf-badge span:first-child {
@@ -748,11 +840,21 @@
         </div>
     </div>
 
+    <!-- Image Preview Modal -->
+    <div id="imageModal" class="image-modal" onclick="closeImageViewer()">
+        <div class="image-modal-content" onclick="event.stopPropagation()">
+            <button class="image-modal-close" onclick="closeImageViewer()">×</button>
+            <img id="imageModalImg" class="image-modal-img" src="" alt="Image preview" />
+        </div>
+    </div>
+
     <script>
         const API_URL = 'http://localhost:3001/posts/public';
+        const EVENTS_API_URL = 'http://localhost:3001/events/public';
         let currentFilter = '';
         let currentMonth = new Date();
         let loadedPostIds = new Set(); // Track loaded posts
+        let monthEvents = []; // events for the currently displayed month
 
         function formatDate(dateString) {
             const date = new Date(dateString);
@@ -831,7 +933,7 @@
                 
                 // Use data attribute instead of onclick for better control
                 displayContent = `
-                    ${thumbnailUrl ? `<img src="${thumbnailUrl.length < 1000 ? thumbnailUrl : ''}" data-src="${thumbnailUrl.length >= 1000 ? thumbnailUrl : ''}" alt="PDF Thumbnail" class="pdf-thumbnail" onclick="openPdfViewerForPost('${post.id}', '${fileName.replace(/'/g, "\\'")}'${isPlaceholder ? ', true' : ''})" loading="lazy" style="min-height: 200px; background: #f5f5f5;" />` : ''}
+                    ${thumbnailUrl ? `<img src="${thumbnailUrl.length < 1000 ? thumbnailUrl : ''}" data-src="${thumbnailUrl.length >= 1000 ? thumbnailUrl : ''}" alt="PDF Thumbnail" class="pdf-thumbnail" onclick="openImageViewerByElement(this)" loading="lazy" style="min-height: 200px; background: rgba(255,255,255,0.06);" />` : ''}
                     <div class="pdf-badge" onclick="openPdfViewerForPost('${post.id}', '${fileName.replace(/'/g, "\\'")}'${isPlaceholder ? ', true' : ''})">
                         <span>📄</span>
                         <span>PDF Document</span>
@@ -840,7 +942,7 @@
             } else if (post.imageUrl) {
                 // Display regular image with lazy loading for large base64
                 const isLargeBase64 = post.imageUrl.length > 1000;
-                displayContent = `<img src="${isLargeBase64 ? '' : post.imageUrl}" data-src="${isLargeBase64 ? post.imageUrl : ''}" alt="Post image" class="post-image" loading="lazy" style="min-height: 200px; background: #f5f5f5;" onerror="this.style.display='none'">`;
+                displayContent = `<img src="${isLargeBase64 ? '' : post.imageUrl}" data-src="${isLargeBase64 ? post.imageUrl : ''}" alt="Post image" class="post-image" loading="lazy" style="min-height: 200px; background: rgba(255,255,255,0.06); cursor: zoom-in;" onclick="openImageViewerByElement(this)" onerror="this.style.display='none'">`;
             }
 
             // Determine if post is urgent (you can add logic here)
@@ -882,6 +984,7 @@
             currentFilter = departmentId;
             toggleFilter();
             loadPosts(true); // Full reload when filtering
+            loadEventsForMonth();
         }
 
         function showLoading(show) {
@@ -906,8 +1009,8 @@
 
             try {
                 const url = currentFilter 
-                    ? `${API_URL}?departmentId=${currentFilter}`
-                    : API_URL;
+                    ? `${API_URL}?departmentId=${currentFilter}&limit=20`
+                    : `${API_URL}?limit=20`;
 
                 const response = await fetch(url);
                 
@@ -916,6 +1019,8 @@
                 }
 
                 const posts = await response.json();
+
+                // List endpoint returns safe media (URLs/thumbnails) and omits huge legacy base64 blobs.
 
                 showLoading(false);
 
@@ -990,7 +1095,30 @@
             await loadPosts(false);
         }
 
-        // Calendar functions
+        // Calendar + events (public)
+        async function loadEventsForMonth() {
+            try {
+                const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+                const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0, 23, 59, 59);
+
+                const params = new URLSearchParams({
+                    startDate: startDate.toISOString(),
+                    endDate: endDate.toISOString(),
+                });
+                if (currentFilter) params.set('departmentId', currentFilter);
+
+                const response = await fetch(`${EVENTS_API_URL}?${params.toString()}`);
+                if (!response.ok) throw new Error(`Events error: ${response.status}`);
+
+                monthEvents = await response.json();
+            } catch (e) {
+                console.error('Failed to load events', e);
+                monthEvents = [];
+            } finally {
+                generateCalendar();
+            }
+        }
+
         function generateCalendar() {
             const grid = document.getElementById('calendarGrid');
             const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -1020,6 +1148,13 @@
 
             // Add day cells
             const today = new Date();
+
+            const eventsByDate = new Map();
+            monthEvents.forEach(ev => {
+                const key = new Date(ev.eventDate).toDateString();
+                eventsByDate.set(key, (eventsByDate.get(key) || 0) + 1);
+            });
+
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayCell = document.createElement('div');
                 dayCell.className = 'calendar-day';
@@ -1030,14 +1165,13 @@
                 if (date.toDateString() === today.toDateString()) {
                     dayCell.classList.add('today');
                 }
-                
-                // Random event indicator (you can replace with real event data)
-                if (Math.random() > 0.7) {
+
+                const count = eventsByDate.get(date.toDateString()) || 0;
+                if (count > 0) {
                     dayCell.classList.add('has-event');
-                    const eventCount = Math.floor(Math.random() * 3) + 1;
                     dayCell.innerHTML = `
                         <span>${day}</span>
-                        <div class="event-count">${eventCount} EVENT${eventCount > 1 ? 'S' : ''}</div>
+                        <div class="event-count">${count} EVENT${count > 1 ? 'S' : ''}</div>
                     `;
                 } else {
                     dayCell.textContent = day;
@@ -1049,7 +1183,7 @@
 
         function changeMonth(delta) {
             currentMonth.setMonth(currentMonth.getMonth() + delta);
-            generateCalendar();
+            loadEventsForMonth();
         }
 
         // Close dropdown when clicking outside
@@ -1065,7 +1199,7 @@
         // Load posts and calendar when page loads
         document.addEventListener('DOMContentLoaded', () => {
             loadPosts(true);
-            generateCalendar();
+            loadEventsForMonth();
         });
 
         // Lazy loading for images
@@ -1096,6 +1230,26 @@
 
         // Cache for full PDF data
         const pdfCache = new Map();
+
+        function openImageViewerByElement(el) {
+            const src = el.getAttribute('data-src') || el.getAttribute('src');
+            if (!src) return;
+            openImageViewer(src);
+        }
+
+        function openImageViewer(src) {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('imageModalImg');
+            img.src = src;
+            modal.classList.add('show');
+        }
+
+        function closeImageViewer() {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('imageModalImg');
+            modal.classList.remove('show');
+            img.src = '';
+        }
 
         // Open PDF viewer for a specific post
         async function openPdfViewerForPost(postId, fileName, needsFetch = false) {
@@ -1177,10 +1331,10 @@
                 
                 container.appendChild(objectEl);
             } else if (pdfUrl.startsWith('http')) {
-                // For external URLs, use iframe with Google Docs Viewer
+                // For URLs (including /documents/:id), embed directly.
                 const iframe = document.createElement('iframe');
                 iframe.className = 'pdf-viewer-iframe';
-                iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+                iframe.src = pdfUrl;
                 container.appendChild(iframe);
             } else {
                 // Invalid URL
