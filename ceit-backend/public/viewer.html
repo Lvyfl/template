@@ -919,6 +919,10 @@
             }
             
             if (isPDF && pdfUrl) {
+                // Seed cache for direct URLs so preview works immediately.
+                if (pdfUrl !== 'PDF_PLACEHOLDER') {
+                    pdfCache.set(post.id, pdfUrl);
+                }
                 // Display PDF with thumbnail
                 // Try to extract filename from data URL if it's base64, otherwise use generic name
                 let fileName = 'document.pdf';
@@ -1283,16 +1287,28 @@
                     // Cache it
                     pdfCache.set(postId, pdfUrl);
                 } else {
-                    // Direct PDF URL (old posts)
-                    const card = document.querySelector(`[data-post-id="${postId}"]`);
-                    if (card) {
-                        // Try to extract from card's data
-                        return;
+                    // Fallback: fetch full post data if URL not in cache
+                    const response = await fetch(`${API_URL}/${postId}`);
+                    if (!response.ok) throw new Error('Failed to load PDF');
+                    const post = await response.json();
+
+                    if (post.imageUrl && post.imageUrl.includes('|')) {
+                        const [pdf] = post.imageUrl.split('|');
+                        pdfUrl = pdf;
+                    } else {
+                        pdfUrl = post.imageUrl;
+                    }
+
+                    if (pdfUrl) {
+                        pdfCache.set(postId, pdfUrl);
                     }
                 }
                 
                 if (pdfUrl) {
-                    openPdfViewer(pdfUrl, fileName);
+                    const redirected = openPdfPreviewPage(pdfUrl);
+                    if (!redirected) {
+                        openPdfViewer(pdfUrl, fileName);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading PDF:', error);
@@ -1300,8 +1316,33 @@
             }
         }
 
+        function extractDocumentId(pdfUrl) {
+            try {
+                const u = new URL(pdfUrl, window.location.origin);
+                const parts = u.pathname.split('/').filter(Boolean);
+                const docIdx = parts.indexOf('documents');
+                if (docIdx >= 0 && parts[docIdx + 1]) {
+                    return parts[docIdx + 1];
+                }
+                return '';
+            } catch {
+                return '';
+            }
+        }
+
+        function openPdfPreviewPage(pdfUrl) {
+            const docId = extractDocumentId(pdfUrl);
+            if (!docId) return false;
+            const target = `/pdf_preview.html?id=${encodeURIComponent(docId)}`;
+            window.open(target, '_blank');
+            return true;
+        }
+
         // PDF Viewer Functions
         function openPdfViewer(pdfUrl, fileName) {
+            const redirected = openPdfPreviewPage(pdfUrl);
+            if (redirected) return;
+
             const modal = document.getElementById('pdfModal');
             const container = document.getElementById('pdfViewerContainer');
             const titleEl = document.getElementById('pdfTitle');
