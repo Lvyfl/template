@@ -13,9 +13,10 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background: linear-gradient(135deg, #000000 0%, #1a0a00 50%, #2d1400 100%);
+            padding: 4px;
+            color: #e5e5e5;
+            margin: 0;
         }
 
         .container {
@@ -26,22 +27,31 @@
         header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
-            padding: 20px;
+            margin-bottom: 4px;
+            padding: 4px;
         }
 
         header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 1.1rem;
+            margin-bottom: 2px;
+            background: linear-gradient(to right, #f97316, #ea580c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: rgba(249, 115, 22, 0.5);
+            font-size: 0.75rem;
         }
 
         .controls {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(249, 115, 22, 0.15);
+            margin-bottom: 4px;
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
@@ -49,64 +59,67 @@
         }
 
         .controls button {
-            padding: 10px 20px;
-            background: #667eea;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #ea580c, #c2410c);
             color: white;
             border: none;
             border-radius: 6px;
-            font-size: 1rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .controls button:hover {
-            background: #5568d3;
+            background: linear-gradient(135deg, #f97316, #ea580c);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
         }
 
         .controls label {
             font-weight: 600;
-            color: #333;
+            color: #d4d4d4;
         }
 
         .controls input[type="checkbox"] {
             width: 18px;
             height: 18px;
             cursor: pointer;
+            accent-color: #f97316;
         }
 
         .tabs {
-            background: white;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
             padding: 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            border-radius: 6px;
+            border: 1px solid rgba(249, 115, 22, 0.15);
+            margin-bottom: 4px;
             display: flex;
             overflow: hidden;
         }
 
         .tab {
             flex: 1;
-            padding: 15px;
-            background: white;
+            padding: 6px;
+            background: transparent;
             border: none;
-            font-size: 1rem;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #666;
+            color: #9ca3af;
             border-bottom: 3px solid transparent;
         }
 
         .tab:hover {
-            background: #f5f5f5;
+            background: rgba(249, 115, 22, 0.05);
+            color: #f97316;
         }
 
         .tab.active {
-            background: #f5f5f5;
-            color: #667eea;
-            border-bottom-color: #667eea;
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+            border-bottom-color: #f97316;
         }
 
         .tab-content {
@@ -118,9 +131,10 @@
         }
 
         .posts-section {
-            background: white;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.15);
             padding: 25px;
             margin-bottom: 20px;
         }
@@ -131,11 +145,12 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 1px solid rgba(249, 115, 22, 0.15);
         }
 
         .upload-form {
-            background: #f9f9f9;
+            background: rgba(249, 115, 22, 0.05);
+            border: 1px solid rgba(249, 115, 22, 0.1);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 25px;
@@ -148,23 +163,26 @@
         .form-label {
             display: block;
             font-weight: 600;
-            color: #333;
+            color: #d4d4d4;
             margin-bottom: 8px;
         }
 
         .form-input, .form-textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 8px;
             font-family: inherit;
             font-size: 1rem;
             transition: border-color 0.3s;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
         }
 
         .form-input:focus, .form-textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #f97316;
+            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15);
         }
 
         .form-textarea {
@@ -188,26 +206,27 @@
             justify-content: center;
             gap: 10px;
             padding: 15px;
-            background: white;
-            border: 2px dashed #667eea;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed rgba(249, 115, 22, 0.4);
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
-            color: #667eea;
+            color: #f97316;
             font-weight: 600;
         }
 
         .file-input-button:hover {
-            background: #f5f5ff;
-            border-color: #5568d3;
+            background: rgba(249, 115, 22, 0.05);
+            border-color: #f97316;
         }
 
         .file-info {
             margin-top: 10px;
             padding: 10px;
-            background: #e8f5e9;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
             border-radius: 6px;
-            color: #2e7d32;
+            color: #4ade80;
             font-size: 0.9rem;
             display: none;
         }
@@ -218,23 +237,25 @@
 
         .submit-btn {
             padding: 12px 24px;
-            background: #667eea;
+            background: linear-gradient(135deg, #ea580c, #c2410c);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
 
         .submit-btn:hover {
-            background: #5568d3;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
         }
 
         .submit-btn:disabled {
-            background: #ccc;
+            background: #404040;
             cursor: not-allowed;
+            box-shadow: none;
         }
 
         .posts-list {
@@ -244,19 +265,20 @@
         }
 
         .post-item {
-            background: white;
-            border: 1px solid #e0e0e0;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(249, 115, 22, 0.1);
             border-radius: 8px;
             padding: 15px;
-            transition: box-shadow 0.2s;
+            transition: all 0.2s;
         }
 
         .post-item:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-color: rgba(249, 115, 22, 0.3);
+            box-shadow: 0 2px 12px rgba(249, 115, 22, 0.1);
         }
 
         .post-caption {
-            color: #333;
+            color: #e5e5e5;
             margin-bottom: 10px;
             line-height: 1.5;
         }
@@ -266,10 +288,10 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.85rem;
-            color: #666;
+            color: #9ca3af;
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px solid #f0f0f0;
+            border-top: 1px solid rgba(249, 115, 22, 0.1);
         }
 
         .pdf-indicator {
@@ -277,32 +299,36 @@
             align-items: center;
             gap: 5px;
             padding: 4px 10px;
-            background: #e3f2fd;
-            color: #1976d2;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
             border-radius: 4px;
             font-size: 0.85rem;
             font-weight: 600;
         }
 
         .calendar-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 8px;
+            border: 1px solid rgba(249, 115, 22, 0.15);
+            padding: 6px;
+            max-width: 100%;
         }
 
         .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 4px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(249, 115, 22, 0.15);
         }
 
         .calendar-header h2 {
-            color: #333;
-            font-size: 1.5rem;
+            color: white;
+            font-size: 0.9rem;
+            margin: 0;
         }
 
         .calendar-nav {
@@ -311,76 +337,92 @@
         }
 
         .calendar-nav button {
-            padding: 8px 16px;
-            background: #667eea;
+            padding: 3px 8px;
+            background: linear-gradient(135deg, #ea580c, #c2410c);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 0.75rem;
         }
 
         .calendar-nav button:hover {
-            background: #5568d3;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
         }
 
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
+            gap: 2px;
         }
 
         .calendar-day-header {
             text-align: center;
             font-weight: 600;
-            padding: 10px;
-            color: #667eea;
-            background: #f8f9ff;
-            border-radius: 6px;
+            padding: 3px 2px;
+            color: #f97316;
+            background: rgba(249, 115, 22, 0.08);
+            border-radius: 3px;
+            font-size: 0.7rem;
         }
 
         .calendar-day {
-            min-height: 100px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 8px;
+            min-height: 28px;
+            border: 1px solid rgba(249, 115, 22, 0.1);
+            border-radius: 4px;
+            padding: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: white;
+            background: rgba(0, 0, 0, 0.2);
         }
 
         .calendar-day:hover {
-            border-color: #667eea;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+            border-color: #f97316;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
         }
 
         .calendar-day.other-month {
-            background: #f9f9f9;
-            opacity: 0.5;
+            background: rgba(0, 0, 0, 0.1);
+            opacity: 0.35;
         }
 
         .calendar-day.today {
-            border-color: #667eea;
-            background: #f8f9ff;
+            border-color: #f97316;
+            background: rgba(249, 115, 22, 0.08);
+        }
+
+        .calendar-day.disabled-day {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .calendar-day.disabled-day:hover {
+            border-color: transparent;
+            box-shadow: none;
         }
 
         .day-number {
             font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
+            color: #d4d4d4;
+            margin-bottom: 1px;
+            font-size: 0.7rem;
         }
 
         .calendar-day.today .day-number {
-            color: #667eea;
+            color: #f97316;
         }
 
         .event-item {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
             color: white;
-            padding: 4px 6px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            margin-bottom: 3px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            margin-bottom: 1px;
             cursor: pointer;
             transition: transform 0.2s ease;
             white-space: nowrap;
@@ -399,7 +441,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -410,13 +453,15 @@
         }
 
         .modal-content {
-            background: white;
-            border-radius: 12px;
+            background: #1a1a1a;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 16px;
             padding: 30px;
             max-width: 500px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
         .modal-header {
@@ -427,22 +472,23 @@
         }
 
         .modal-header h2 {
-            color: #333;
+            color: white;
         }
 
         .close-btn {
             font-size: 1.5rem;
             cursor: pointer;
-            color: #999;
+            color: #6b7280;
             background: none;
             border: none;
             padding: 0;
             width: 30px;
             height: 30px;
+            transition: color 0.2s;
         }
 
         .close-btn:hover {
-            color: #333;
+            color: #f97316;
         }
 
         .form-group {
@@ -452,7 +498,7 @@
         .form-group label {
             display: block;
             font-weight: 600;
-            color: #333;
+            color: #d4d4d4;
             margin-bottom: 8px;
         }
 
@@ -460,17 +506,20 @@
         .form-group textarea {
             width: 100%;
             padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 8px;
             font-size: 1rem;
             font-family: inherit;
             transition: border-color 0.3s ease;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
         }
 
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #f97316;
+            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15);
         }
 
         .form-group textarea {
@@ -488,37 +537,41 @@
         .btn {
             padding: 10px 20px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .btn-primary {
-            background: #667eea;
+            background: linear-gradient(135deg, #ea580c, #c2410c);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #5568d3;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
         }
 
         .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #d4d4d4;
         }
 
         .btn-secondary:hover {
-            background: #d0d0d0;
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .btn-danger {
-            background: #ff6b6b;
-            color: white;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
         }
 
         .btn-danger:hover {
-            background: #ff5252;
+            background: #ef4444;
+            color: white;
         }
 
         .event-details {
@@ -530,7 +583,7 @@
         }
 
         .event-details strong {
-            color: #667eea;
+            color: #f97316;
             display: inline-block;
             min-width: 100px;
         }
@@ -538,13 +591,14 @@
         .loading {
             text-align: center;
             padding: 40px;
-            color: white;
+            color: #f97316;
             font-size: 1.2rem;
         }
 
         .error {
-            background: #ff6b6b;
-            color: white;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -553,24 +607,33 @@
 
         .legend {
             display: flex;
-            gap: 20px;
+            gap: 12px;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 4px;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: #666;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: #9ca3af;
         }
 
         .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
         }
+
+        /* Dark mode scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(249, 115, 22, 0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(249, 115, 22, 0.7); }
+
+        /* Dark mode for native date inputs */
+        input[type="datetime-local"] { color-scheme: dark; }
 
         @media (max-width: 768px) {
             header h1 {
@@ -578,12 +641,12 @@
             }
 
             .calendar-grid {
-                gap: 5px;
+                gap: 4px;
             }
 
             .calendar-day {
-                min-height: 80px;
-                padding: 5px;
+                min-height: 60px;
+                padding: 4px;
             }
 
             .controls {
@@ -781,7 +844,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000';
+        const API_URL = 'http://localhost:3001';
         let currentDate = new Date();
         let allEvents = [];
         
@@ -905,12 +968,19 @@
             }
 
             const today = new Date();
-            if (
-                date.getDate() === today.getDate() &&
-                date.getMonth() === today.getMonth() &&
-                date.getFullYear() === today.getFullYear()
-            ) {
+            today.setHours(0, 0, 0, 0);
+            const cellDate = new Date(date);
+            cellDate.setHours(0, 0, 0, 0);
+
+            const isToday = cellDate.getTime() === today.getTime();
+            const isPastOrToday = cellDate <= today;
+
+            if (isToday) {
                 dayElement.classList.add('today');
+            }
+
+            if (isPastOrToday) {
+                dayElement.classList.add('disabled-day');
             }
 
             const dayNumberDiv = document.createElement('div');
@@ -939,9 +1009,9 @@
                 dayElement.appendChild(eventItem);
             });
 
-            // Click to add event on this day
+            // Click to add event on this day (only future dates)
             dayElement.onclick = () => {
-                if (!isOtherMonth) {
+                if (!isOtherMonth && !isPastOrToday) {
                     openAddEventModal(date);
                 }
             };
@@ -1035,10 +1105,22 @@
             // Reset form
             document.getElementById('addEventForm').reset();
 
-            // If a date was clicked, preset the date
+            // Set min date to tomorrow (only future dates allowed)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            const minDateStr = tomorrow.toISOString().slice(0, 16);
+            document.getElementById('eventDate').setAttribute('min', minDateStr);
+            document.getElementById('eventEndDate').setAttribute('min', minDateStr);
+
+            // If a date was clicked, preset the date (only if it's in the future)
             if (presetDate) {
-                const dateString = presetDate.toISOString().slice(0, 16);
-                document.getElementById('eventDate').value = dateString;
+                const pd = new Date(presetDate);
+                pd.setHours(0, 0, 0, 0);
+                if (pd > new Date(new Date().setHours(0,0,0,0))) {
+                    const dateString = presetDate.toISOString().slice(0, 16);
+                    document.getElementById('eventDate').value = dateString;
+                }
             }
         }
 
@@ -1063,6 +1145,24 @@
                 endDate: document.getElementById('eventEndDate').value || null,
                 location: document.getElementById('eventLocation').value,
             };
+
+            // Client-side: ensure event date is strictly in the future
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDate = new Date(eventData.eventDate);
+            selectedDate.setHours(0, 0, 0, 0);
+            if (selectedDate <= today) {
+                alert('Event date must be a future date (after today).');
+                return;
+            }
+            if (eventData.endDate) {
+                const selectedEndDate = new Date(eventData.endDate);
+                selectedEndDate.setHours(0, 0, 0, 0);
+                if (selectedEndDate <= today) {
+                    alert('End date must be a future date (after today).');
+                    return;
+                }
+            }
 
             try {
                 const response = await fetch(`${API_URL}/events`, {
@@ -1138,6 +1238,29 @@
             if (event.target === viewModal) {
                 closeViewEventModal();
             }
+        }
+
+        // Lazy loading for images
+        function setupLazyLoading() {
+            const images = document.querySelectorAll('img[data-src]');
+            if (images.length === 0) return;
+            
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.getAttribute('data-src');
+                        if (src) {
+                            img.src = src;
+                            img.removeAttribute('data-src');
+                        }
+                        imageObserver.unobserve(img);
+                    }
+                });
+            }, {
+                rootMargin: '100px'
+            });
+            images.forEach(img => imageObserver.observe(img));
         }
 
         // Initialize
@@ -1256,6 +1379,7 @@
             submitBtn.disabled = true;
             submitBtn.textContent = '📤 Uploading...';
 
+            const currentToken = localStorage.getItem('token');
             try {
                 // Combine PDF URL and thumbnail: pdfUrl|thumbnailBase64
                 const combinedData = `${pdfUrl}|${thumbnailBase64}`;
@@ -1306,6 +1430,7 @@
         }
 
         async function loadDepartmentPosts() {
+            const currentToken = localStorage.getItem('token');
             try {
                 const response = await fetch(`${API_URL}/posts`, {
                     headers: {
@@ -1350,7 +1475,8 @@
                     const isImage = post.imageUrl && !isPDF && !post.imageUrl.includes('|');
                     
                     // Check if it's a valid base64 PDF or old mock URL
-                    const isValidPdf = isPDF && pdfUrl.startsWith('data:application/pdf');
+                    const isPlaceholder = isPDF && pdfUrl === 'PDF_PLACEHOLDER';
+                    const isValidPdf = isPDF && (pdfUrl.startsWith('data:application/pdf') || isPlaceholder);
                     const isOldMockUrl = isPDF && pdfUrl.includes('example.com');
                     
                     let fileIndicator = '';
@@ -1364,7 +1490,9 @@
                         fileIndicator = '<span class="pdf-indicator">🖼️ Image</span>';
                     }
                     
-                    const thumbnailHtml = thumbnailUrl ? `<img src="${thumbnailUrl}" alt="Thumbnail" style="max-width: 150px; border-radius: 8px; margin-top: 10px; cursor: pointer;" onclick="window.open('${displayUrl}', '_blank')" />` : '';
+                    // Optimize large base64 images with lazy loading
+                    const isLargeBase64 = thumbnailUrl && thumbnailUrl.length > 1000;
+                    const thumbnailHtml = thumbnailUrl ? `<img src="${isLargeBase64 ? '' : thumbnailUrl}" data-src="${isLargeBase64 ? thumbnailUrl : ''}" alt="Thumbnail" style="max-width: 150px; border-radius: 8px; margin-top: 10px; cursor: pointer; min-height: 100px; background: #f5f5f5;" onclick="window.open('${displayUrl}', '_blank')" loading="lazy" />` : '';
                     
                     // Add proper link text based on file type
                     const viewLinkText = isPDF ? '📄 View PDF' : '🔗 View File';
@@ -1384,6 +1512,9 @@
                         </div>
                     `;
                 }).join('');
+                
+                // Setup lazy loading for images after rendering
+                setTimeout(() => setupLazyLoading(), 100);
 
             } catch (error) {
                 console.error('Error loading posts:', error);
@@ -1396,6 +1527,7 @@
                 return;
             }
 
+            const currentToken = localStorage.getItem('token');
             try {
                 const response = await fetch(`${API_URL}/posts/${postId}`, {
                     method: 'DELETE',

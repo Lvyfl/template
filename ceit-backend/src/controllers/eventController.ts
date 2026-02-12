@@ -13,6 +13,24 @@ export const createEvent = async (req: any, res: Response) => {
       return res.status(400).json({ error: 'Title and event date are required' });
     }
 
+    // Validate that event date is strictly in the future (after today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDateObj = new Date(eventDate);
+    const eventDateOnly = new Date(eventDateObj);
+    eventDateOnly.setHours(0, 0, 0, 0);
+    if (eventDateOnly <= today) {
+      return res.status(400).json({ error: 'Event date must be a future date (after today)' });
+    }
+    if (endDate) {
+      const endDateObj = new Date(endDate);
+      const endDateOnly = new Date(endDateObj);
+      endDateOnly.setHours(0, 0, 0, 0);
+      if (endDateOnly <= today) {
+        return res.status(400).json({ error: 'End date must be a future date (after today)' });
+      }
+    }
+
     const [newEvent] = await db.insert(events).values({
       title,
       description,

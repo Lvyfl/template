@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* ====== Theme Variables ====== */
+:root, .dark {
+  --body-bg: linear-gradient(to bottom right, #000, #111827, #431407);
+  --text-base: white;
+  --scrollbar-thumb: rgba(249, 115, 22, 0.5);
+  --scrollbar-thumb-hover: rgba(249, 115, 22, 0.8);
+  --select-bg: rgb(17, 24, 39);
+  --autofill-text: white;
+  --autofill-shadow: rgba(255, 255, 255, 0.1);
+}
+
+.light {
+  --body-bg: linear-gradient(135deg, #fafafa 0%, #f5f5f5 50%, #fff7ed 100%);
+  --text-base: #1e293b;
+  --scrollbar-thumb: rgba(249, 115, 22, 0.3);
+  --scrollbar-thumb-hover: rgba(249, 115, 22, 0.6);
+  --select-bg: white;
+  --autofill-text: #1e293b;
+  --autofill-shadow: rgba(0, 0, 0, 0.05);
+}
+
+/* ====== Base styles ====== */
+body {
+  background: var(--body-bg);
+  color: var(--text-base);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+input, textarea, select {
+  color: var(--text-base);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgb(156, 163, 175);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Improve select dropdown visibility */
+select option {
+  background-color: var(--select-bg);
+  color: var(--text-base);
+}
+
+/* Ensure autofill doesn't override colors */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--autofill-text);
+  -webkit-box-shadow: 0 0 0px 1000px var(--autofill-shadow) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}

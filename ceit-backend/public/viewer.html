@@ -749,7 +749,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000/posts/public';
+        const API_URL = 'http://localhost:3001/posts/public';
         let currentFilter = '';
         let currentMonth = new Date();
         let loadedPostIds = new Set(); // Track loaded posts
@@ -794,6 +794,7 @@
         function createPostCard(post) {
             const card = document.createElement('div');
             card.className = 'post-card';
+            card.dataset.postId = post.id; // Store post ID for later fetching
 
             // Parse imageUrl - it might contain PDF URL and thumbnail separated by |
             let isPDF = false;
@@ -825,20 +826,21 @@
                     fileName = pdfUrl.split('/').pop() || 'document.pdf';
                 }
                 
-                // Escape the URLs for onclick attributes
-                const escapedPdfUrl = pdfUrl.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const escapedFileName = fileName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                // Check if it's a placeholder (for optimized loading)
+                const isPlaceholder = pdfUrl === 'PDF_PLACEHOLDER';
                 
+                // Use data attribute instead of onclick for better control
                 displayContent = `
-                    ${thumbnailUrl ? `<img src="${thumbnailUrl}" alt="PDF Thumbnail" class="pdf-thumbnail" onclick="openPdfViewer('${escapedPdfUrl}', '${escapedFileName}')" />` : ''}
-                    <div class="pdf-badge" onclick="openPdfViewer('${escapedPdfUrl}', '${escapedFileName}')">
+                    ${thumbnailUrl ? `<img src="${thumbnailUrl.length < 1000 ? thumbnailUrl : ''}" data-src="${thumbnailUrl.length >= 1000 ? thumbnailUrl : ''}" alt="PDF Thumbnail" class="pdf-thumbnail" onclick="openPdfViewerForPost('${post.id}', '${fileName.replace(/'/g, "\\'")}'${isPlaceholder ? ', true' : ''})" loading="lazy" style="min-height: 200px; background: #f5f5f5;" />` : ''}
+                    <div class="pdf-badge" onclick="openPdfViewerForPost('${post.id}', '${fileName.replace(/'/g, "\\'")}'${isPlaceholder ? ', true' : ''})">
                         <span>📄</span>
                         <span>PDF Document</span>
                     </div>
                 `;
             } else if (post.imageUrl) {
-                // Display regular image
-                displayContent = `<img src="${post.imageUrl}" alt="Post image" class="post-image" onerror="this.style.display='none'">`;
+                // Display regular image with lazy loading for large base64
+                const isLargeBase64 = post.imageUrl.length > 1000;
+                displayContent = `<img src="${isLargeBase64 ? '' : post.imageUrl}" data-src="${isLargeBase64 ? post.imageUrl : ''}" alt="Post image" class="post-image" loading="lazy" style="min-height: 200px; background: #f5f5f5;" onerror="this.style.display='none'">`;
             }
 
             // Determine if post is urgent (you can add logic here)
@@ -954,6 +956,9 @@
                         loadedPostIds.add(post.id);
                         container.appendChild(createPostCard(post));
                     });
+                    
+                    // Setup lazy loading for images
+                    setupLazyLoading();
                 } else {
                     // Background check - only add new posts
                     let newPostsCount = 0;
@@ -1063,8 +1068,83 @@
             generateCalendar();
         });
 
+        // Lazy loading for images
+        function setupLazyLoading() {
+            const images = document.querySelectorAll('img[data-src]');
+            if (images.length === 0) return;
+            
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.getAttribute('data-src');
+                        if (src) {
+                            img.src = src;
+                            img.removeAttribute('data-src');
+                        }
+                        imageObserver.unobserve(img);
+                    }
+                });
+            }, {
+                rootMargin: '100px'
+            });
+            images.forEach(img => imageObserver.observe(img));
+        }
+
         // Check for new posts every 60 seconds (without clearing existing posts)
         setInterval(checkForNewPosts, 60000);
+
+        // Cache for full PDF data
+        const pdfCache = new Map();
+
+        // Open PDF viewer for a specific post
+        async function openPdfViewerForPost(postId, fileName, needsFetch = false) {
+            try {
+                let pdfUrl = null;
+                
+                // Check cache first
+                if (pdfCache.has(postId)) {
+                    pdfUrl = pdfCache.get(postId);
+                } else if (needsFetch) {
+                    // Show loading
+                    const modal = document.getElementById('pdfModal');
+                    const container = document.getElementById('pdfViewerContainer');
+                    modal.style.display = 'block';
+                    container.innerHTML = '<div style="text-align: center; padding: 50px; color: #667eea;"><h3>Loading PDF...</h3></div>';
+                    
+                    // Fetch full post data
+                    const response = await fetch(`${API_URL}/${postId}`);
+                    if (!response.ok) throw new Error('Failed to load PDF');
+                    
+                    const post = await response.json();
+                    
+                    // Extract PDF URL
+                    if (post.imageUrl && post.imageUrl.includes('|')) {
+                        const [pdf, thumbnail] = post.imageUrl.split('|');
+                        pdfUrl = pdf;
+                    } else {
+                        pdfUrl = post.imageUrl;
+                    }
+                    
+                    // Cache it
+                    pdfCache.set(postId, pdfUrl);
+                } else {
+                    // Direct PDF URL (old posts)
+                    const card = document.querySelector(`[data-post-id="${postId}"]`);
+                    if (card) {
+                        // Try to extract from card's data
+                        return;
+                    }
+                }
+                
+                if (pdfUrl) {
+                    openPdfViewer(pdfUrl, fileName);
+                }
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                alert('Failed to load PDF. Please try again.');
+            }
+        }
 
         // PDF Viewer Functions
         function openPdfViewer(pdfUrl, fileName) {
